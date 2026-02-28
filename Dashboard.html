@@ -1,100 +1,96 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>SonicStream & Kangaroo Jump</title>
+    <title>SonicStream Dashboard</title>
     <style>
-        body { background: #000; color: #00ff00; font-family: monospace; text-align: center; margin: 0; padding: 10px; }
+        body { background: #000; color: #00ff00; font-family: monospace; text-align: center; padding: 20px; }
+        .area-musik { border: 2px solid #00ff00; padding: 15px; margin-bottom: 20px; border-radius: 10px; }
+        input { width: 80%; padding: 12px; background: #000; color: #00ff00; border: 1px solid #00ff00; margin-bottom: 10px; }
+        button { padding: 10px 15px; background: #00ff00; color: #000; border: none; font-weight: bold; cursor: pointer; margin: 5px; }
+        .list-musik { border: 1px dashed #00ff00; padding: 15px; text-align: left; max-width: 500px; margin: 0 auto; }
         
-        /* DESAIN AREA MUSIK */
-        .area-musik { border: 2px dashed #00ff00; padding: 15px; margin-bottom: 20px; border-radius: 10px; }
-        input { width: 70%; padding: 10px; background: #111; color: #00ff00; border: 1px solid #00ff00; margin-bottom: 10px; }
-        button { background: #00ff00; color: #000; border: none; padding: 8px 15px; font-weight: bold; cursor: pointer; border-radius: 5px; margin: 5px; }
-        .daftar-lagu { text-align: left; background: #0a0a0a; padding: 10px; height: 100px; overflow-y: auto; margin-top: 10px; }
-
-        /* DESAIN GAME KANGURU */
-        .area-game { border: 2px solid #00ff00; padding: 10px; background: #111; border-radius: 10px; position: relative; overflow: hidden; }
+        /* AREA GAME KANGURU */
+        .area-game { border: 2px solid #00ff00; padding: 10px; background: #111; margin-top: 20px; }
         #layar-game { width: 100%; height: 150px; background: #000; position: relative; border-bottom: 3px solid #00ff00; overflow: hidden; }
-        
-        #kanguru { width: 30px; height: 40px; background: #00ff00; position: absolute; bottom: 0; left: 20px; border-radius: 5px 5px 0 0; }
+        #kanguru { width: 30px; height: 40px; background: #00ff00; position: absolute; bottom: 0; left: 20px; }
         #rintangan { width: 20px; height: 30px; background: red; position: absolute; bottom: 0; right: -20px; animation: jalan 2s infinite linear; }
-
-        /* Animasi Lompat */
-        .lompat-pendek { animation: loncatPendek 0.5s ease-out; }
-        .lompat-tinggi { animation: loncatTinggi 0.8s ease-out; }
-
-        @keyframes loncatPendek { 0% { bottom: 0; } 50% { bottom: 60px; } 100% { bottom: 0; } }
-        @keyframes loncatTinggi { 0% { bottom: 0; } 50% { bottom: 120px; } 100% { bottom: 0; } }
+        
+        .lompat-pendek { animation: loncatP 0.5s ease-out; }
+        .lompat-tinggi { animation: loncatT 0.8s ease-out; }
+        @keyframes loncatP { 0%, 100% { bottom: 0; } 50% { bottom: 60px; } }
+        @keyframes loncatT { 0%, 100% { bottom: 0; } 50% { bottom: 120px; } }
         @keyframes jalan { 0% { right: -20px; } 100% { right: 100%; } }
     </style>
 </head>
 <body>
-
-    <h2>SONIC STREAM</h2>
-
+    <h2>📟 SONIC STREAM DASHBOARD</h2>
+    
     <div class="area-musik">
-        <p>🎵 Tempel URL Lagu di Sini:</p>
-        <input type="text" id="urlLagu" placeholder="https://...">
-        <button onclick="simpanLagu()">SIMPAN</button>
-        
-        <div class="daftar-lagu" id="koleksiKu">
-            </div>
+        <p>TEMPEL URL LAGU DI SINI:</p>
+        <input type="text" id="urlLagu" placeholder="https://youtube.com/...">
+        <br>
+        <button onclick="simpanLagu()">SIMPAN LAGU</button>
+    </div>
+
+    <div id="panggung-musik" style="margin-bottom: 20px; display: none;">
+        <div id="player-langsung"></div>
+    </div>
+
+    <div class="list-musik">
+        <h3>📂 KOLEKSI ANDA:</h3>
+        <div id="koleksiKu"></div>
     </div>
 
     <div class="area-game">
-        <p>🦘 KANGAROO JUMP (Main Sambil Dengar Lagu)</p>
+        <p>🦘 KANGAROO JUMP</p>
         <div id="layar-game">
             <div id="kanguru"></div>
             <div id="rintangan"></div>
         </div>
-        <br>
         <button onclick="lompat('pendek')">Lompat Pendek</button>
         <button onclick="lompat('tinggi')">Lompat Tinggi</button>
     </div>
 
     <script>
-        // --- LOGIKA PENYIMPANAN MUSIK ---
         function simpanLagu() {
             let link = document.getElementById('urlLagu').value;
             if(link) {
-                let daftar = JSON.parse(localStorage.getItem('lagu_koleksi')) || [];
+                let daftar = JSON.parse(localStorage.getItem('sonic_v3')) || [];
                 daftar.push(link);
-                localStorage.setItem('lagu_koleksi', JSON.stringify(daftar));
-                document.getElementById('urlLagu').value = ""; 
+                localStorage.setItem('sonic_v3', JSON.stringify(daftar));
+                document.getElementById('urlLagu').value = "";
                 muatLagu();
             }
         }
 
         function muatLagu() {
-            let daftar = JSON.parse(localStorage.getItem('lagu_koleksi')) || [];
+            let daftar = JSON.parse(localStorage.getItem('sonic_v3')) || [];
             let html = "";
             daftar.forEach((url, i) => {
-                html += `<div style="margin-bottom: 5px; border-bottom: 1px solid #333; padding-bottom: 5px;">
-                            ▶️ Lagu ${i+1} 
-                            <button style="padding: 2px 5px; font-size: 10px;" onclick="window.open('${url}', '_blank')">PUTAR</button>
-                         </div>`;
+                html += `<div style="padding: 10px; border-bottom: 1px solid #222; display: flex; justify-content: space-between;">
+                    <span>🎵 Lagu ${i+1}</span>
+                    <button onclick="putarDiSini('${url}')">PUTAR DI SINI</button>
+                </div>`;
             });
             document.getElementById('koleksiKu').innerHTML = html;
         }
-        muatLagu(); // Panggil saat layar dibuka
 
-        // --- LOGIKA GAME KANGURU ---
-        let kanguru = document.getElementById('kanguru');
-        
-        function lompat(jenis) {
-            // Cek jika sedang lompat agar tidak error
-            if(kanguru.classList.contains('lompat-pendek') || kanguru.classList.contains('lompat-tinggi')) {
-                return; 
-            }
-
-            if(jenis === 'pendek') {
-                kanguru.classList.add('lompat-pendek');
-                setTimeout(() => { kanguru.classList.remove('lompat-pendek'); }, 500);
-            } else {
-                kanguru.classList.add('lompat-tinggi');
-                setTimeout(() => { kanguru.classList.remove('lompat-tinggi'); }, 800);
+        function putarDiSini(url) {
+            let id = url.includes('v=') ? url.split('v=')[1].split('&')[0] : url.split('youtu.be/')[1];
+            if(id) {
+                document.getElementById('panggung-musik').style.display = 'block';
+                document.getElementById('player-langsung').innerHTML = `<iframe width="100%" height="150" src="https://www.youtube.com/embed/${id}?autoplay=1" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
             }
         }
-    </script>
 
+        function lompat(jenis) {
+            let k = document.getElementById('kanguru');
+            let kelas = jenis === 'pendek' ? 'lompat-pendek' : 'lompat-tinggi';
+            k.classList.add(kelas);
+            setTimeout(() => k.classList.remove(kelas), jenis === 'pendek' ? 500 : 800);
+        }
+
+        muatLagu();
+    </script>
 </body>
 </html>
