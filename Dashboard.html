@@ -96,3 +96,55 @@
     </script>
 </body>
 </html>
+<div id="player-musik-dalam" style="margin-top: 15px; display: none; border: 2px solid #00ff00; padding: 10px;">
+    <p>正在播放 (Sedang Diputar di SonicStream):</p>
+    <div id="video-frame"></div>
+</div>
+
+<script>
+    function saveM() {
+        let val = document.getElementById('inM').value;
+        if(val) {
+            let d = JSON.parse(localStorage.getItem('sm')) || [];
+            d.push(val);
+            localStorage.setItem('sm', JSON.stringify(d));
+            document.getElementById('inM').value = ""; // Bersihkan kotak input
+            muatM();
+        }
+    }
+
+    function muatM() {
+        let d = JSON.parse(localStorage.getItem('sm')) || [];
+        document.getElementById('listM').innerHTML = d.map((u, i) => `
+            <div style="margin-bottom: 10px; border-bottom: 1px solid #222; padding-bottom: 5px; display: flex; justify-content: space-between; align-items: center;">
+                <span>🎵 Lagu ${i+1}</span>
+                <button onclick="putarLangsung('${u}')" style="background:#00ff00; color:#000; font-size:10px; padding:5px;">PUTAR DI SINI</button>
+            </div>`).join('');
+    }
+
+    // INI KUNCINYA: Biar tidak terbawa ke YouTube
+    function putarLangsung(url) {
+        let videoId = "";
+        
+        // Mengambil ID Video dari link YouTube
+        if(url.includes('v=')) {
+            videoId = url.split('v=')[1].split('&')[0];
+        } else if(url.includes('youtu.be/')) {
+            videoId = url.split('youtu.be/')[1];
+        }
+
+        if(videoId) {
+            document.getElementById('player-musik-dalam').style.display = 'block';
+            // Memasukkan video ke dalam Iframe (Bingkai)
+            document.getElementById('video-frame').innerHTML = `
+                <iframe width="100%" height="180" 
+                    src="https://www.youtube.com/embed/${videoId}?autoplay=1" 
+                    frameborder="0" allow="autoplay; encrypted-media" allowfullscreen>
+                </iframe>`;
+        } else {
+            alert("Master, link-nya sepertinya kurang tepat.");
+        }
+    }
+    
+    muatM();
+</script>
