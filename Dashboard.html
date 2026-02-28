@@ -1,96 +1,98 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>SonicStream Dashboard</title>
+    <title>SonicStream Dashboard v3</title>
     <style>
-        body { background: #000; color: #00ff00; font-family: monospace; text-align: center; padding: 20px; }
-        .area-musik { border: 2px solid #00ff00; padding: 15px; margin-bottom: 20px; border-radius: 10px; }
-        input { width: 80%; padding: 12px; background: #000; color: #00ff00; border: 1px solid #00ff00; margin-bottom: 10px; }
-        button { padding: 10px 15px; background: #00ff00; color: #000; border: none; font-weight: bold; cursor: pointer; margin: 5px; }
-        .list-musik { border: 1px dashed #00ff00; padding: 15px; text-align: left; max-width: 500px; margin: 0 auto; }
+        body { background: #000; color: #00ff00; font-family: monospace; text-align: center; margin: 0; padding: 10px; }
         
-        /* AREA GAME KANGURU */
-        .area-game { border: 2px solid #00ff00; padding: 10px; background: #111; margin-top: 20px; }
-        #layar-game { width: 100%; height: 150px; background: #000; position: relative; border-bottom: 3px solid #00ff00; overflow: hidden; }
+        /* Navigasi Utama */
+        .nav-master { position: sticky; top: 0; background: #000; padding: 10px; border-bottom: 2px solid #00ff00; z-index: 100; display: flex; justify-content: space-around; }
+        .nav-btn { background: transparent; color: #00ff00; border: 1px solid #00ff00; padding: 5px 10px; cursor: pointer; font-size: 12px; }
+        .active { background: #00ff00; color: #000; }
+
+        .section { display: none; padding: 20px; border: 1px solid #00ff00; margin-top: 10px; border-radius: 10px; }
+        .show { display: block; }
+
+        /* Game Style */
+        #layar-game { width: 100%; height: 120px; background: #000; position: relative; border-bottom: 3px solid #00ff00; overflow: hidden; }
         #kanguru { width: 30px; height: 40px; background: #00ff00; position: absolute; bottom: 0; left: 20px; }
         #rintangan { width: 20px; height: 30px; background: red; position: absolute; bottom: 0; right: -20px; animation: jalan 2s infinite linear; }
-        
-        .lompat-pendek { animation: loncatP 0.5s ease-out; }
-        .lompat-tinggi { animation: loncatT 0.8s ease-out; }
-        @keyframes loncatP { 0%, 100% { bottom: 0; } 50% { bottom: 60px; } }
-        @keyframes loncatT { 0%, 100% { bottom: 0; } 50% { bottom: 120px; } }
         @keyframes jalan { 0% { right: -20px; } 100% { right: 100%; } }
+        .jump { animation: j 0.5s ease-out; }
+        @keyframes j { 0%, 100% { bottom: 0; } 50% { bottom: 80px; } }
     </style>
 </head>
 <body>
-    <h2>📟 SONIC STREAM DASHBOARD</h2>
-    
-    <div class="area-musik">
-        <p>TEMPEL URL LAGU DI SINI:</p>
-        <input type="text" id="urlLagu" placeholder="https://youtube.com/...">
-        <br>
-        <button onclick="simpanLagu()">SIMPAN LAGU</button>
+
+    <div class="nav-master">
+        <button class="nav-btn active" onclick="bukaLayar(1, this)">1. MUSIK</button>
+        <button class="nav-btn" onclick="bukaLayar(2, this)">2. GAME</button>
+        <button class="nav-btn" onclick="bukaLayar(3, this)" style="border-color: #00ffff; color: #00ffff;">3. CINEMA</button>
     </div>
 
-    <div id="panggung-musik" style="margin-bottom: 20px; display: none;">
-        <div id="player-langsung"></div>
+    <div id="L1" class="section show">
+        <h3>[ LAYAR 1: PENYIMPANAN MUSIK ]</h3>
+        <input type="text" id="inM" placeholder="Link YouTube..." style="width:80%; padding:10px; background:#000; color:#00ff00; border:1px solid #00ff00;">
+        <button onclick="saveM()" style="margin-top:10px; padding:10px; background:#00ff00; color:#000; border:none; font-weight:bold;">SIMPAN</button>
+        <div id="listM" style="text-align:left; margin-top:10px;"></div>
     </div>
 
-    <div class="list-musik">
-        <h3>📂 KOLEKSI ANDA:</h3>
-        <div id="koleksiKu"></div>
-    </div>
-
-    <div class="area-game">
-        <p>🦘 KANGAROO JUMP</p>
+    <div id="L2" class="section">
+        <h3>[ LAYAR 2: KANGAROO JUMP ]</h3>
         <div id="layar-game">
             <div id="kanguru"></div>
             <div id="rintangan"></div>
         </div>
-        <button onclick="lompat('pendek')">Lompat Pendek</button>
-        <button onclick="lompat('tinggi')">Lompat Tinggi</button>
+        <button onclick="lompat()" style="width:100%; padding:20px; background:#00ff00; color:#000; font-weight:bold; margin-top:10px;">LOMPAT!</button>
+    </div>
+
+    <div id="L3" class="section" style="border-color: #00ffff;">
+        <h3 style="color: #00ffff;">[ LAYAR 3: SONIC CINEMA ]</h3>
+        <p>Upload video dari HP Master:</p>
+        <input type="file" id="upV" accept="video/*" style="color:#00ffff;">
+        <button onclick="playV()" style="background:#00ffff; color:#000; border:none; padding:10px; font-weight:bold; margin-top:10px;">TAMPILKAN VIDEO</button>
+        <div id="vBox" style="margin-top:15px;"></div>
     </div>
 
     <script>
-        function simpanLagu() {
-            let link = document.getElementById('urlLagu').value;
-            if(link) {
-                let daftar = JSON.parse(localStorage.getItem('sonic_v3')) || [];
-                daftar.push(link);
-                localStorage.setItem('sonic_v3', JSON.stringify(daftar));
-                document.getElementById('urlLagu').value = "";
-                muatLagu();
+        function bukaLayar(n, btn) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('show'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('L' + n).classList.add('show');
+            btn.classList.add('active');
+        }
+
+        function saveM() {
+            let val = document.getElementById('inM').value;
+            if(val) {
+                let d = JSON.parse(localStorage.getItem('sm')) || [];
+                d.push(val);
+                localStorage.setItem('sm', JSON.stringify(d));
+                muatM();
             }
         }
 
-        function muatLagu() {
-            let daftar = JSON.parse(localStorage.getItem('sonic_v3')) || [];
-            let html = "";
-            daftar.forEach((url, i) => {
-                html += `<div style="padding: 10px; border-bottom: 1px solid #222; display: flex; justify-content: space-between;">
-                    <span>🎵 Lagu ${i+1}</span>
-                    <button onclick="putarDiSini('${url}')">PUTAR DI SINI</button>
-                </div>`;
-            });
-            document.getElementById('koleksiKu').innerHTML = html;
+        function muatM() {
+            let d = JSON.parse(localStorage.getItem('sm')) || [];
+            document.getElementById('listM').innerHTML = d.map((u, i) => `<div>🎵 ${i+1} <button onclick="window.open('${u}')">PUTAR</button></div>`).join('');
         }
 
-        function putarDiSini(url) {
-            let id = url.includes('v=') ? url.split('v=')[1].split('&')[0] : url.split('youtu.be/')[1];
-            if(id) {
-                document.getElementById('panggung-musik').style.display = 'block';
-                document.getElementById('player-langsung').innerHTML = `<iframe width="100%" height="150" src="https://www.youtube.com/embed/${id}?autoplay=1" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
-            }
-        }
-
-        function lompat(jenis) {
+        function lompat() {
             let k = document.getElementById('kanguru');
-            let kelas = jenis === 'pendek' ? 'lompat-pendek' : 'lompat-tinggi';
-            k.classList.add(kelas);
-            setTimeout(() => k.classList.remove(kelas), jenis === 'pendek' ? 500 : 800);
+            if(!k.classList.contains('jump')) {
+                k.classList.add('jump');
+                setTimeout(() => k.classList.remove('jump'), 500);
+            }
         }
 
-        muatLagu();
+        function playV() {
+            let f = document.getElementById('upV').files[0];
+            if(f) {
+                let u = URL.createObjectURL(f);
+                document.getElementById('vBox').innerHTML = `<video width="100%" controls src="${u}" style="border:2px solid #00ffff;"></video>`;
+            }
+        }
+        muatM();
     </script>
 </body>
 </html>
