@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SonicStream</title>
+    <style>
+        body { background: #000; color: #00ff00; font-family: 'Courier New', monospace; margin: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; overflow: hidden; }
+        
+        .judul-utama { font-size: 3em; text-shadow: 0 0 20px #00ff00; animation: pulse 2s infinite; }
+        
+        @keyframes pulse {
+            0% { opacity: 0.5; }
+            50% { opacity: 1; }
+            100% { opacity: 0.5; }
+        }
+
+        .tombol-masuk {
+            position: absolute;
+            bottom: 50px; /* Letaknya di bawah sesuai permintaan Master */
+            padding: 15px 40px;
+            background: transparent;
+            color: #00ff00;
+            border: 2px solid #00ff00;
+            font-weight: bold;
+            cursor: pointer;
+            text-decoration: none;
+            transition: 0.3s;
+        }
+
+        .tombol-masuk:hover {
+            background: #00ff00;
+            color: #000;
+            box-shadow: 0 0 30px #00ff00;
+        }
+    </style>
+</head>
+<body>
+
+    <h1 class="judul-utama">SONIC STREAM</h1>
+    
+    <a href="Dashboard.html" class="tombol-masuk">PENCET DI SINI UNTUK MASUK</a>
+
+</body>
+</html>
