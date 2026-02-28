@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SonicStream Dashboard</title>
+    <style>
+        body { background: #000; color: #00ff00; font-family: monospace; text-align: center; padding: 20px; }
+        .input-box { border: 2px solid #00ff00; padding: 20px; border-radius: 10px; margin-bottom: 30px; background: #0a0a0a; }
+        input { width: 80%; padding: 12px; background: #000; color: #00ff00; border: 1px solid #00ff00; margin-bottom: 10px; }
+        button { padding: 10px 20px; background: #00ff00; color: #000; border: none; font-weight: bold; cursor: pointer; }
+        .list-musik { border: 1px dashed #00ff00; padding: 15px; text-align: left; max-width: 500px; margin: 0 auto; }
+        .item-lagu { background: #111; margin: 10px 0; padding: 10px; border-left: 5px solid #00ff00; display: flex; justify-content: space-between; }
+    </style>
+</head>
+<body>
+    <h2>📟 SISTEM PENYIMPANAN MUSIK</h2>
+    
+    <div class="input-box">
+        <p>TEMPEL URL LAGU DI SINI:</p>
+        <input type="text" id="linkYoutube" placeholder="Salin link lagu di sini...">
+        <br>
+        <button onclick="prosesLagu()">SIMPAN & PUTAR</button>
+    </div>
+
+    <div class="list-musik">
+        <h3>📂 KOLEKSI ANDA:</h3>
+        <div id="daftarLagu"></div>
+    </div>
+
+    <script>
+        function prosesLagu() {
+            let link = document.getElementById('linkYoutube').value;
+            if(link) {
+                let koleksi = JSON.parse(localStorage.getItem('my_music')) || [];
+                koleksi.push(link);
+                localStorage.setItem('my_music', JSON.stringify(koleksi));
+                document.getElementById('linkYoutube').value = ""; // Kosongkan kotak
+                tampilkanLagu();
+            }
+        }
+
+        function tampilkanLagu() {
+            let koleksi = JSON.parse(localStorage.getItem('my_music')) || [];
+            let html = "";
+            koleksi.forEach((url, i) => {
+                html += `<div class="item-lagu">
+                    <span>🎵 Lagu #${i+1}</span>
+                    <button onclick="window.open('${url}', '_blank')">DENGARKAN</button>
+                </div>`;
+            });
+            document.getElementById('daftarLagu').innerHTML = html;
+        }
+
+        // Tampilkan lagu yang sudah tersimpan saat layar dibuka
+        tampilkanLagu();
+    </script>
+</body>
+</html>
+
