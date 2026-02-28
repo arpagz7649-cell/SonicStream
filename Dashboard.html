@@ -1,58 +1,100 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>SonicStream Dashboard</title>
+    <title>SonicStream & Kangaroo Jump</title>
     <style>
-        body { background: #000; color: #00ff00; font-family: monospace; text-align: center; padding: 20px; }
-        .input-box { border: 2px solid #00ff00; padding: 20px; border-radius: 10px; margin-bottom: 30px; background: #0a0a0a; }
-        input { width: 80%; padding: 12px; background: #000; color: #00ff00; border: 1px solid #00ff00; margin-bottom: 10px; }
-        button { padding: 10px 20px; background: #00ff00; color: #000; border: none; font-weight: bold; cursor: pointer; }
-        .list-musik { border: 1px dashed #00ff00; padding: 15px; text-align: left; max-width: 500px; margin: 0 auto; }
-        .item-lagu { background: #111; margin: 10px 0; padding: 10px; border-left: 5px solid #00ff00; display: flex; justify-content: space-between; }
+        body { background: #000; color: #00ff00; font-family: monospace; text-align: center; margin: 0; padding: 10px; }
+        
+        /* DESAIN AREA MUSIK */
+        .area-musik { border: 2px dashed #00ff00; padding: 15px; margin-bottom: 20px; border-radius: 10px; }
+        input { width: 70%; padding: 10px; background: #111; color: #00ff00; border: 1px solid #00ff00; margin-bottom: 10px; }
+        button { background: #00ff00; color: #000; border: none; padding: 8px 15px; font-weight: bold; cursor: pointer; border-radius: 5px; margin: 5px; }
+        .daftar-lagu { text-align: left; background: #0a0a0a; padding: 10px; height: 100px; overflow-y: auto; margin-top: 10px; }
+
+        /* DESAIN GAME KANGURU */
+        .area-game { border: 2px solid #00ff00; padding: 10px; background: #111; border-radius: 10px; position: relative; overflow: hidden; }
+        #layar-game { width: 100%; height: 150px; background: #000; position: relative; border-bottom: 3px solid #00ff00; overflow: hidden; }
+        
+        #kanguru { width: 30px; height: 40px; background: #00ff00; position: absolute; bottom: 0; left: 20px; border-radius: 5px 5px 0 0; }
+        #rintangan { width: 20px; height: 30px; background: red; position: absolute; bottom: 0; right: -20px; animation: jalan 2s infinite linear; }
+
+        /* Animasi Lompat */
+        .lompat-pendek { animation: loncatPendek 0.5s ease-out; }
+        .lompat-tinggi { animation: loncatTinggi 0.8s ease-out; }
+
+        @keyframes loncatPendek { 0% { bottom: 0; } 50% { bottom: 60px; } 100% { bottom: 0; } }
+        @keyframes loncatTinggi { 0% { bottom: 0; } 50% { bottom: 120px; } 100% { bottom: 0; } }
+        @keyframes jalan { 0% { right: -20px; } 100% { right: 100%; } }
     </style>
 </head>
 <body>
-    <h2>📟 SISTEM PENYIMPANAN MUSIK</h2>
-    
-    <div class="input-box">
-        <p>TEMPEL URL LAGU DI SINI:</p>
-        <input type="text" id="linkYoutube" placeholder="Salin link lagu di sini...">
-        <br>
-        <button onclick="prosesLagu()">SIMPAN & PUTAR</button>
+
+    <h2>SONIC STREAM</h2>
+
+    <div class="area-musik">
+        <p>🎵 Tempel URL Lagu di Sini:</p>
+        <input type="text" id="urlLagu" placeholder="https://...">
+        <button onclick="simpanLagu()">SIMPAN</button>
+        
+        <div class="daftar-lagu" id="koleksiKu">
+            </div>
     </div>
 
-    <div class="list-musik">
-        <h3>📂 KOLEKSI ANDA:</h3>
-        <div id="daftarLagu"></div>
+    <div class="area-game">
+        <p>🦘 KANGAROO JUMP (Main Sambil Dengar Lagu)</p>
+        <div id="layar-game">
+            <div id="kanguru"></div>
+            <div id="rintangan"></div>
+        </div>
+        <br>
+        <button onclick="lompat('pendek')">Lompat Pendek</button>
+        <button onclick="lompat('tinggi')">Lompat Tinggi</button>
     </div>
 
     <script>
-        function prosesLagu() {
-            let link = document.getElementById('linkYoutube').value;
+        // --- LOGIKA PENYIMPANAN MUSIK ---
+        function simpanLagu() {
+            let link = document.getElementById('urlLagu').value;
             if(link) {
-                let koleksi = JSON.parse(localStorage.getItem('my_music')) || [];
-                koleksi.push(link);
-                localStorage.setItem('my_music', JSON.stringify(koleksi));
-                document.getElementById('linkYoutube').value = ""; // Kosongkan kotak
-                tampilkanLagu();
+                let daftar = JSON.parse(localStorage.getItem('lagu_koleksi')) || [];
+                daftar.push(link);
+                localStorage.setItem('lagu_koleksi', JSON.stringify(daftar));
+                document.getElementById('urlLagu').value = ""; 
+                muatLagu();
             }
         }
 
-        function tampilkanLagu() {
-            let koleksi = JSON.parse(localStorage.getItem('my_music')) || [];
+        function muatLagu() {
+            let daftar = JSON.parse(localStorage.getItem('lagu_koleksi')) || [];
             let html = "";
-            koleksi.forEach((url, i) => {
-                html += `<div class="item-lagu">
-                    <span>🎵 Lagu #${i+1}</span>
-                    <button onclick="window.open('${url}', '_blank')">DENGARKAN</button>
-                </div>`;
+            daftar.forEach((url, i) => {
+                html += `<div style="margin-bottom: 5px; border-bottom: 1px solid #333; padding-bottom: 5px;">
+                            ▶️ Lagu ${i+1} 
+                            <button style="padding: 2px 5px; font-size: 10px;" onclick="window.open('${url}', '_blank')">PUTAR</button>
+                         </div>`;
             });
-            document.getElementById('daftarLagu').innerHTML = html;
+            document.getElementById('koleksiKu').innerHTML = html;
         }
+        muatLagu(); // Panggil saat layar dibuka
 
-        // Tampilkan lagu yang sudah tersimpan saat layar dibuka
-        tampilkanLagu();
+        // --- LOGIKA GAME KANGURU ---
+        let kanguru = document.getElementById('kanguru');
+        
+        function lompat(jenis) {
+            // Cek jika sedang lompat agar tidak error
+            if(kanguru.classList.contains('lompat-pendek') || kanguru.classList.contains('lompat-tinggi')) {
+                return; 
+            }
+
+            if(jenis === 'pendek') {
+                kanguru.classList.add('lompat-pendek');
+                setTimeout(() => { kanguru.classList.remove('lompat-pendek'); }, 500);
+            } else {
+                kanguru.classList.add('lompat-tinggi');
+                setTimeout(() => { kanguru.classList.remove('lompat-tinggi'); }, 800);
+            }
+        }
     </script>
+
 </body>
 </html>
-
